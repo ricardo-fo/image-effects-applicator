@@ -1,3 +1,7 @@
+# Project
+/applicator/bin/
+/applicator/obj/
+
 # Prerequisites
 *.d
 
