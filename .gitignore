@@ -1,6 +1,11 @@
 # Project
 /applicator/bin/
 /applicator/obj/
+/applicator/*.ppm
+/applicator/Dependencies/
+/applicator/*.depend
+/applicator/*.layout
+/applicator/*.cbp
 
 # Prerequisites
 *.d
