@@ -1,11 +1,11 @@
-# image-effects-applicator
+# Image Effects Applicator
 Apply image effects using parallel computing.
 
 > Team:
-> - Alexandre Saura;  
-> - Fábio Thomaz;  
-> - Ricardo Oliveira;  
-> - Rodrigo Suarez.  
+> Alexandre Saura;  
+> Fábio Thomaz;  
+> Ricardo Oliveira;  
+> Rodrigo Suarez.  
 
 ## Main Tasks:  
 - [ ] Read the image;  
