@@ -5,7 +5,7 @@
 /applicator/Dependencies/
 /applicator/*.depend
 /applicator/*.layout
-/applicator/*.cbp
+/applicator/applicator.cbp
 
 # Prerequisites
 *.d
