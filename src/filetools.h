@@ -12,4 +12,7 @@ char * get_filename(const char *);
 /* Converte um arquivo de imagem para .ppm */
 char * to_ppm(const char *);
 
+/* Aplica os efeitos na imagem */
+void apply_effects(const char *);
+
 #endif // FILETOOLS_H_INCLUDED

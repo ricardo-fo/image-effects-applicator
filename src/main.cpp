@@ -1,10 +1,12 @@
 #include <iostream>
 #include "utils.h"
 #include "filetools.h"
+#include "Classes/PPMImage.h"
 
 using namespace std;
 
 int main() {
+    PPMImage p;
     // Lê o caminho até o arquivo
     cout << "Caminho absoluto até a sua imagem: ";
     char * path = read_str(FILE_PATH);
@@ -16,8 +18,10 @@ int main() {
     }
 
     // Transforma o arquivo para .ppm
-    char * filename = to_ppm(path);
-    cout << "Seu arquivo: " << filename << endl;
+    char * new_path = to_ppm(path);
+
+    // Aplica os efeitos e salva as imagens
+    apply_effects(new_path);
 
     return 0;
 }

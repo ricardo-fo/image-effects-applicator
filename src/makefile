@@ -3,16 +3,16 @@
 CC=g++
 
 # Flags
-CFLAGS=-W -Wall -L/usr/X11R6/lib -lm -lpthread -lX11
+CFLAGS=-W -Wall -L/usr/X11R6/lib -lm -lpthread -lX11 -fopenmp
 
 # Executável
-EXEC=aplicacao.exe
+EXEC=exec
 
 # File
 FILE=main.cpp
 
 # Nome do executavel
-PROJ_NAME=aplicacao.exe
+PROJ_NAME=exec
 
 # Arquivos source, i.e. extensão .c
 C_SRC=$(wildcard *.cpp)
@@ -22,14 +22,14 @@ OBJ=$(C_SRC:.c=.o)
 
 ##### Regras e dependências #####
 $(PROJ_NAME): $(OBJ)
-	$(CC) -o $(PROJ_NAME) $(OBJ) $(CFLAGS) -lm
+	$(CC) -o $(PROJ_NAME) $(OBJ) $(CFLAGS)
 	@echo "\nCompilação finalizada!"
 	@echo "\nComandos aceitos:"
 	@echo "'make run'      - Executa a aplicação."
 	@echo "'make clean'    - Remove todos os arquivos .ppm que estão no mesmo diretório da aplicação."
 	@echo "'make mrproper' - Remove o arquivo executável gerado."
 
-main.o: main.c filetools.h utils.h CImg.h
+main.o: main.c filetools.h utils.h CImg.h Classes/PPMImage.h
 	$(CC) -cpp $(FILE) $(CFLAGS)
 
 filetools.o: filetools.h utils.h
@@ -44,7 +44,7 @@ run:
 
 # Limpar de arquivos
 clean:
-	rm -rf *.ppm
+	rm -rf img/*.ppm
 
 # Apagar tudo o que deve ser modificado
 mrproper:
