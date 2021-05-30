@@ -3,7 +3,7 @@
 CC=g++
 
 # Flags
-CFLAGS=-W -Wall -O2 -L/usr/X11R6/lib -lm -lpthread -lX11
+CFLAGS=-W -Wall -L/usr/X11R6/lib -lm -lpthread -lX11
 
 # Executável
 EXEC=aplicacao.exe
@@ -23,10 +23,20 @@ OBJ=$(C_SRC:.c=.o)
 ##### Regras e dependências #####
 $(PROJ_NAME): $(OBJ)
 	$(CC) -o $(PROJ_NAME) $(OBJ) $(CFLAGS) -lm
-	@echo "\nCompilação finalizada!\nDigite 'make run' e tecle <enter> para executar a aplicacao"
+	@echo "\nCompilação finalizada!"
+	@echo "\nComandos aceitos:"
+	@echo "'make run'      - Executa a aplicação."
+	@echo "'make clean'    - Remove todos os arquivos .ppm que estão no mesmo diretório da aplicação."
+	@echo "'make mrproper' - Remove o arquivo executável gerado."
 
-main.o: main.c CImg.h
-	$(CC) -c $(FILE) $(CFLAGS)
+main.o: main.c filetools.h utils.h CImg.h
+	$(CC) -cpp $(FILE) $(CFLAGS)
+
+filetools.o: filetools.h utils.h
+	$(CC) -cpp filetools.cpp $(CFLAGS)
+
+utils.o: utils.h
+	$(CC) -cpp utils.cpp $(CFLAGS)
 
 # Executar
 run:
@@ -34,7 +44,7 @@ run:
 
 # Limpar de arquivos
 clean:
-	rm -rf *.o
+	rm -rf *.ppm
 
 # Apagar tudo o que deve ser modificado
 mrproper:

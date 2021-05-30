@@ -1,11 +1,23 @@
 #include <iostream>
-#include "CImg.h"
+#include "utils.h"
+#include "filetools.h"
 
 using namespace std;
 
-int main()
-{
-    cimg_library::CImg<unsigned char> image("/home/ricardo/Pictures/Wallpapers/pink_floyd.jpg");
-    image.save("result.ppm");
+int main() {
+    // Lê o caminho até o arquivo
+    cout << "Caminho absoluto até a sua imagem: ";
+    char * path = read_str(FILE_PATH);
+
+    // Checa se o arquivo existe
+    if (!has_file(path)) {
+      cout << "\nO arquivo do caminho informado não pôde ser encontrado." << endl;
+      return 1;
+    }
+
+    // Transforma o arquivo para .ppm
+    char * filename = to_ppm(path);
+    cout << "Seu arquivo: " << filename << endl;
+
     return 0;
 }
