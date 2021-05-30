@@ -8,7 +8,7 @@ Apply image effects using parallel computing.
 > Rodrigo Suarez.  
 
 ## Main Tasks:  
-- [ ] Read the image;  
-- [ ] Convert the image to .ppm;  
+- [x] Read the image;  
+- [x] Convert the image to .ppm;  
 - [ ] Apply effects;  
 - [ ] Convert the image to the source format.  
