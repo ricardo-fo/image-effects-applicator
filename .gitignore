@@ -4,6 +4,8 @@
 /src/*.ppm
 /src/Dependencies/
 /src/applicator.cbp
+/src/*.ppm
+/src/*.exe
 
 # Prerequisites
 *.d

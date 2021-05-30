@@ -1,7 +1,7 @@
 # Image Effects Applicator
 Apply image effects using parallel computing.
 
-> Team:
+> Team:  
 > Alexandre Saura;  
 > Fábio Thomaz;  
 > Ricardo Oliveira;  
