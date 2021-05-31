@@ -1,4 +1,5 @@
 #include <iostream>
+#include <climits>
 #include "utils.h"
 #include "filetools.h"
 #include "Classes/PPMImage.h"
@@ -19,9 +20,15 @@ int main() {
 
     // Transforma o arquivo para .ppm
     char * new_path = to_ppm(path);
+    free(path);
 
     // Aplica os efeitos e salva as imagens
-    apply_effects(new_path);
+    cout << "\nDigite o número dos efeitos que deseja aplicar, seperando-os por vírgula.\nExemplo:\n>>> 1, 2\n>>> 3, 1, 2\n\nEfeitos disponíveis:\n<1> Preto e branco;\n<2> Sépia;\n<3> Granulado.\n>>> ";
+    char * effects = read_str();
+    int * effectsArr = extract_effects(effects);
+    free(effects);
+
+    apply_effects(new_path, effectsArr);
 
     return 0;
 }

@@ -6,13 +6,25 @@
 /* Verifica se um arquivo existe. */
 bool has_file(const char *);
 
-/* Extraí o nome de um arquivo, se a sua extensão, de um caminho informado. */
+/* Extrai o nome de um arquivo, se a sua extensão, de um caminho informado. */
 char * get_filename(const char *);
 
 /* Converte um arquivo de imagem para .ppm */
 char * to_ppm(const char *);
 
+/* Extrai os efeitos passados em uma string. */
+int * extract_effects(const char *);
+
+/* Remove os espaços à esquerda de uma string. */
+char * ltrim(char *);
+
+/* Remove os espaços à direita de uma string. */
+char * rtrim(char *);
+
+/* Remove os espaços de uma string. */
+char * trim(char *);
+
 /* Aplica os efeitos na imagem */
-void apply_effects(const char *);
+void apply_effects(const char *, const int *);
 
 #endif // FILETOOLS_H_INCLUDED
