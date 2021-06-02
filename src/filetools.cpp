@@ -3,6 +3,8 @@
 #include "filetools.h"
 #include "utils.h"
 #include "CImg.h"
+#include "PPMReader.h"
+#include "PPMImage.h"
 
 using namespace std;
 
@@ -32,7 +34,7 @@ bool has_file (const char * path) {
 char * to_ppm(const char * path) {
   // Gera o nome do arquivo
   char * filename = get_filename(path);
-  filename = strcat(filename, ".ppm");
+  filename        = strcat(filename, ".ppm");
   char * fullpath = new char[strlen(filename) + sizeof(char) * 5];
   strcpy(fullpath, "img/");
   strcat(fullpath, filename);
@@ -47,7 +49,6 @@ char * to_ppm(const char * path) {
     c_random = read_str(random);
     strcat(filename, c_random);
     strcat(filename, ".ppm");
-    free(c_random);
 
     // Cria o caminho completo
     fullpath = new char[strlen(filename) + sizeof(char) * 5];
@@ -91,22 +92,22 @@ char * get_filename(const char * path) {
  */
 int * extract_effects(const char * effects) {
   const char * delim = ",";
-  char * copy = new char[strlen(effects) + 1];    // Cópia da string effects para ser manipulada
-  char * token = new char[strlen(effects) + 1];   // Token, i.e. efeitos
-  char * sanitezed = new char[strlen(token) + 1]; // Token sanitizado
-  int * effects_arr;
-  size_t size;
+  char * copy        = new char[strlen(effects) + 1]; // Cópia da string effects para ser manipulada
+  char * token       = new char[strlen(effects) + 1]; // Token, i.e. efeitos
+  char * sanitized   = new char[strlen(token) + 1];   // Token sanitizado
+  int * effects_arr  = (int *) malloc(0);             // Reserva espaço na memória para o vetor de efeitos
+  size_t size = 0;
 
   // Extrai os efeitos da string copy
   strcpy(copy, effects);
   token = strtok(copy, delim);
   while(token != NULL) {
-    strcpy(sanitezed, token);
+    strcpy(sanitized, token);
 
     // Realoca o tamanho do vetor e insere o novo elemento
     size += sizeof(int);
     effects_arr = (int *) realloc(effects_arr, size);
-    effects_arr[(int)(size / sizeof(int)) - 1] = atoi(trim(sanitezed));
+    effects_arr[(int)(size / sizeof(int)) - 1] = atoi(trim(sanitized));
 
     // Busca pelo próximo token
     token = strtok(NULL, delim);
@@ -173,7 +174,33 @@ char * trim(char * str) {
  *
  * returns: void
  */
-void apply_effects(const char * path, const int * effects) {
-  cout << path << endl;
-  // cout << effects << endl;
+void apply_effects(const char * path, int * effects) {
+  // Setta o máximo de threads disponíveis
+  omp_set_num_threads(omp_get_max_threads());
+
+  // Lê a imagem ppm gerada
+  PPMReader reader(path);
+  reader.load();
+  PPMImage img = reader.getImage();
+  PPMImage * imgs = (PPMImage *) malloc(0);
+
+  // Aplica os efeitos
+  // while ((*effects) != INT_MIN && (*effects) < 10) {
+  //   switch(*effects) {
+  //     case 1:
+  //       cout << "Tô na Globo, mãe!" << endl;
+  //       break;
+  //     case 2:
+  //       cout << "Tô na Record, mãe!" << endl;
+  //       break;
+  //     case 3:
+  //       cout << "Tô na SBT, mãe!" << endl;
+  //       break;
+  //     default:
+  //       cout << "Efeito não encontrado." << endl;
+  //   }
+  //   cout << (*effects) << endl;
+  //
+  //   (*effects)++;
+  // }
 }

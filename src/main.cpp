@@ -2,12 +2,10 @@
 #include <climits>
 #include "utils.h"
 #include "filetools.h"
-#include "Classes/PPMImage.h"
 
 using namespace std;
 
 int main() {
-    PPMImage p;
     // Lê o caminho até o arquivo
     cout << "Caminho absoluto até a sua imagem: ";
     char * path = read_str(FILE_PATH);
@@ -29,6 +27,7 @@ int main() {
     free(effects);
 
     apply_effects(new_path, effectsArr);
+    cout << "abacaxi" << endl;
 
     return 0;
 }

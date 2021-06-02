@@ -25,6 +25,6 @@ char * rtrim(char *);
 char * trim(char *);
 
 /* Aplica os efeitos na imagem */
-void apply_effects(const char *, const int *);
+void apply_effects(const char *, int *);
 
 #endif // FILETOOLS_H_INCLUDED
