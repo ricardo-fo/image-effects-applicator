@@ -19,8 +19,10 @@ class PPMReader {
     // Salva uma imagem ppm
     void write(const char *);
 
-    // // Retorna um objeto contendo os dados da imagem PPM
+    // Retorna um objeto contendo os dados da imagem PPM
     PPMImage * getImage();
+
+    void setImage(PPMImage *);
 
     // Muda o caminho até o arquivo ppm
     void setPath(const char *);

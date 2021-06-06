@@ -21,12 +21,14 @@ int main() {
     free(path);
 
     // Aplica os efeitos e salva as imagens
-    cout << "\nDigite o número dos efeitos que deseja aplicar, seperando-os por vírgula.\nExemplo:\n>>> 1, 2\n>>> 3, 1, 2\n\nEfeitos disponíveis:\n<1> Preto e branco;\n<2> Sépia;\n<3> Granulado.\n>>> ";
+    cout << "\nDigite o número dos efeitos que deseja aplicar, seperando-os por vírgula.\nExemplo:\n>>> 1, 2\n>>> 3, 1, 2\n\nEfeitos disponíveis:\n<1> Inverter cores;\n<2> Sépia;\n<3> Granulado.\n>>> ";
     char * effects = read_str();
     int * effectsArr = extract_effects(effects);
     free(effects);
 
     apply_effects(new_path, effectsArr);
+
+    cout << "\nEfeitos aplicados com sucesso." << endl;
 
     return 0;
 }

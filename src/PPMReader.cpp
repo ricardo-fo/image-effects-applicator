@@ -45,8 +45,6 @@ void PPMReader::load() {
   }
 
   while(fgetc(stream) != '\n');
-  cout << "X: " << img->width << endl;
-  cout << "Y: " << img->height << endl;
 
   img->pixel = (PPMPixel *) malloc(sizeof(PPMPixel) * img->width * img->height);
   if (!img) {
@@ -80,6 +78,11 @@ void PPMReader::write(const char * filename) {
 
 PPMImage * PPMReader::getImage() {
   return image;
+}
+
+void PPMReader::setImage(PPMImage * img) {
+  image = (PPMImage *) malloc(sizeof(img));
+  image = img;
 }
 
 void PPMReader::setPath(const char * _path) {

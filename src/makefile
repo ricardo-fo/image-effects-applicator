@@ -26,7 +26,8 @@ $(PROJ_NAME): $(OBJ)
 	@echo "\nCompilação finalizada!"
 	@echo "\nComandos aceitos:"
 	@echo "'make run'      - Executa a aplicação."
-	@echo "'make clean'    - Remove todos os arquivos .ppm que estão no mesmo diretório da aplicação."
+	@echo "'make free'     - Remove todos os arquivos .ppm que estão no diretório 'img/'."
+	@echo "'make clean'    - Remove todos os arquivos .o que foram gerados."
 	@echo "'make mrproper' - Remove o arquivo executável gerado."
 
 main.o: main.cpp filetools.h utils.h CImg.h

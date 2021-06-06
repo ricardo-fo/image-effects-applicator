@@ -3,6 +3,8 @@
 
 #define FILE_PATH "/home/ricardo/Pictures/Wallpapers/pink_floyd.jpg"
 
+#include "PPMImage.h"
+
 /* Verifica se um arquivo existe. */
 bool has_file(const char *);
 
@@ -26,5 +28,9 @@ char * trim(char *);
 
 /* Aplica os efeitos na imagem */
 void apply_effects(const char *, int *);
+
+void reverseColor(PPMImage *);
+
+void grayscale(PPMImage *);
 
 #endif // FILETOOLS_H_INCLUDED

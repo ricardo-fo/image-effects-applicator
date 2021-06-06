@@ -1,5 +1,6 @@
 #include <iostream>
 #include <climits>
+#include <omp.h>
 #include "filetools.h"
 #include "utils.h"
 #include "CImg.h"
@@ -180,27 +181,46 @@ void apply_effects(const char * path, int * effects) {
 
   // Lê a imagem ppm gerada
   PPMReader reader(path);
-  reader.load();
-  PPMImage * img = reader.getImage();
-  PPMImage * imgs = (PPMImage *) malloc(0);
 
   // Aplica os efeitos
-  // while ((*effects) != INT_MIN && (*effects) < 10) {
-  //   switch(*effects) {
-  //     case 1:
-  //       cout << "Tô na Globo, mãe!" << endl;
-  //       break;
-  //     case 2:
-  //       cout << "Tô na Record, mãe!" << endl;
-  //       break;
-  //     case 3:
-  //       cout << "Tô na SBT, mãe!" << endl;
-  //       break;
-  //     default:
-  //       cout << "Efeito não encontrado." << endl;
-  //   }
-  //   cout << (*effects) << endl;
-  //
-  //   (*effects)++;
-  // }
+  while (*effects != INT_MIN) {
+    switch(*effects) {
+      case 1:
+        reader.load();
+        reverseColor(reader.getImage());
+        reader.write(strcat(read_str("img/"), strcat(get_filename(path), "_1.ppm")));
+        break;
+      case 2:
+        reader.load();
+        grayscale(reader.getImage());
+        reader.write(strcat(read_str("img/"), strcat(get_filename(path), "_2.ppm")));
+        break;
+      case 3:
+        cout << "Tô na SBT, mãe!" << endl;
+        break;
+      default:
+        cout << "O efeito '" << *effects << "' não foi encontrado." << endl;
+    }
+
+    // Para o otimizador do compilador não achar que essa variável não serve para nada
+    if (*(effects++)) {};
+  }
+}
+
+void reverseColor(PPMImage * img) {
+  #pragma omp parallel for
+  for (int i = 0; i < img->width * img->height; i++) {
+    img->pixel[i].r = img->maxColorVal - img->pixel[i].r;
+    img->pixel[i].g = img->maxColorVal - img->pixel[i].g;
+    img->pixel[i].b = img->maxColorVal - img->pixel[i].b;
+  }
+}
+
+void grayscale(PPMImage * img) {
+  #pragma omp parallel for
+  for (int i = 0; i < img->width * img->height; i++) {
+    img->pixel[i].r = (int) img->pixel[i].r * 0.2126;
+    img->pixel[i].g = (int) img->pixel[i].g * 0.7152;
+    img->pixel[i].b = (int) img->pixel[i].b * 0.0722;
+  }
 }
