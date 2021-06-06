@@ -181,7 +181,7 @@ void apply_effects(const char * path, int * effects) {
   // Lê a imagem ppm gerada
   PPMReader reader(path);
   reader.load();
-  PPMImage img = reader.getImage();
+  PPMImage * img = reader.getImage();
   PPMImage * imgs = (PPMImage *) malloc(0);
 
   // Aplica os efeitos

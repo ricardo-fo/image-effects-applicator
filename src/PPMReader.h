@@ -8,7 +8,7 @@
 class PPMReader {
   private:
     char * path;
-    PPMImage image;
+    PPMImage * image;
 
   public:
     PPMReader(const char *);
@@ -16,8 +16,11 @@ class PPMReader {
     // Carrega a imagem ppm
     void load();
 
+    // Salva uma imagem ppm
+    void write(const char *);
+
     // // Retorna um objeto contendo os dados da imagem PPM
-    PPMImage& getImage();
+    PPMImage * getImage();
 
     // Muda o caminho até o arquivo ppm
     void setPath(const char *);

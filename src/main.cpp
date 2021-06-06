@@ -27,7 +27,6 @@ int main() {
     free(effects);
 
     apply_effects(new_path, effectsArr);
-    cout << "abacaxi" << endl;
 
     return 0;
 }
