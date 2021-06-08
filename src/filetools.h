@@ -1,7 +1,7 @@
 #ifndef FILETOOLS_H_INCLUDED
 #define FILETOOLS_H_INCLUDED
 
-#define FILE_PATH "/home/ricardo/Pictures/Wallpapers/pink_floyd.jpg"
+#define FILE_PATH "/home/ricardo/Desktop/a.jpg"
 
 #include "PPMImage.h"
 
@@ -31,6 +31,6 @@ void apply_effects(const char *, int *);
 
 void reverseColor(PPMImage *);
 
-void grayscale(PPMImage *);
+void green(PPMImage *);
 
 #endif // FILETOOLS_H_INCLUDED

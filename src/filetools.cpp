@@ -181,6 +181,8 @@ void apply_effects(const char * path, int * effects) {
 
   // Lê a imagem ppm gerada
   PPMReader reader(path);
+  char * filename = (char *) malloc(0);
+  char * fullpath = (char *) malloc(0);
 
   // Aplica os efeitos
   while (*effects != INT_MIN) {
@@ -188,12 +190,20 @@ void apply_effects(const char * path, int * effects) {
       case 1:
         reader.load();
         reverseColor(reader.getImage());
-        reader.write(strcat(read_str("img/"), strcat(get_filename(path), "_1.ppm")));
+        fullpath = read_str("img/");
+        filename = get_filename(path);
+        strcat(filename, "_1.ppm");
+        strcat(fullpath, filename);
+        reader.write(fullpath);
         break;
       case 2:
         reader.load();
-        grayscale(reader.getImage());
-        reader.write(strcat(read_str("img/"), strcat(get_filename(path), "_2.ppm")));
+        green(reader.getImage());
+        fullpath = read_str("img/");
+        filename = get_filename(path);
+        strcat(filename, "_2.ppm");
+        strcat(fullpath, filename);
+        reader.write(fullpath);
         break;
       case 3:
         cout << "Tô na SBT, mãe!" << endl;
@@ -205,6 +215,9 @@ void apply_effects(const char * path, int * effects) {
     // Para o otimizador do compilador não achar que essa variável não serve para nada
     if (*(effects++)) {};
   }
+
+  free(fullpath);
+  free(filename);
 }
 
 void reverseColor(PPMImage * img) {
@@ -216,7 +229,7 @@ void reverseColor(PPMImage * img) {
   }
 }
 
-void grayscale(PPMImage * img) {
+void green(PPMImage * img) {
   #pragma omp parallel for
   for (int i = 0; i < img->width * img->height; i++) {
     img->pixel[i].r = (int) img->pixel[i].r * 0.2126;

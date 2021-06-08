@@ -23,8 +23,8 @@ char * read_str(string str) {
   strcpy(c_str, str.c_str());
 
   // Aloca dinamicamente espaço para a string
-  void * dyn_str = (void *) malloc (sizeof(char));
-  dyn_str = realloc(c_str, (str.length() + 1) * sizeof(char));
+  char * dyn_str = (char *) malloc (sizeof(char));
+  dyn_str = (char *) realloc(c_str, (str.length() + 1) * sizeof(char));
 
-  return (char *) dyn_str;
+  return dyn_str;
 }
