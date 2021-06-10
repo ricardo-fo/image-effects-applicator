@@ -33,4 +33,6 @@ void reverseColor(PPMImage *);
 
 void green(PPMImage *);
 
+void striped(PPMImage *);
+
 #endif // FILETOOLS_H_INCLUDED

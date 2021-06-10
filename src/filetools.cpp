@@ -206,7 +206,13 @@ void apply_effects(const char * path, int * effects) {
         reader.write(fullpath);
         break;
       case 3:
-        cout << "Tô na SBT, mãe!" << endl;
+        reader.load();
+        striped(reader.getImage());
+        fullpath = read_str("img/");
+        filename = get_filename(path);
+        strcat(filename, "_3.ppm");
+        strcat(fullpath, filename);
+        reader.write(fullpath);
         break;
       default:
         cout << "O efeito '" << *effects << "' não foi encontrado." << endl;
@@ -235,5 +241,16 @@ void green(PPMImage * img) {
     img->pixel[i].r = (int) img->pixel[i].r * 0.2126;
     img->pixel[i].g = (int) img->pixel[i].g * 0.7152;
     img->pixel[i].b = (int) img->pixel[i].b * 0.0722;
+  }
+}
+
+void striped(PPMImage * img) {
+  #pragma omp parallel for
+  for (int i = 0; i < img->width * img->height; i++) {
+    if (i % 3 == 0) {
+      img->pixel[i].r = img->maxColorVal - img->pixel[i].r;
+      img->pixel[i].g = img->maxColorVal - img->pixel[i].g;
+      img->pixel[i].b = img->maxColorVal - img->pixel[i].b;
+    }
   }
 }
