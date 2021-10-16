@@ -6,7 +6,6 @@
 #include "CImg.h"
 #include "PPMReader.h"
 #include "PPMImage.h"
-#include <cuda.h>
 
 using namespace std;
 
@@ -235,7 +234,7 @@ void apply_effects(const char *path, int *effects)
     // Para o otimizador do compilador não achar que essa variável não serve para nada
     if (*(effects++))
     {
-    }
+    };
   }
 
   free(fullpath);
@@ -244,19 +243,13 @@ void apply_effects(const char *path, int *effects)
 
 void reverseColor(PPMImage *img)
 {
-  int size = img->width * img->height * sizeof(PPMPixel *) + sizeof(img);
-  PPMImage *cpy;
-  cudaMalloc((void **)&cpy, size);
-  cudaMemcpy(cpy, img, size, cudaMemcpyHostToDevice);
-  // #pragma omp parallel for
+#pragma omp parallel for
   for (int i = 0; i < img->width * img->height; i++)
   {
     img->pixel[i].r = img->maxColorVal - img->pixel[i].r;
     img->pixel[i].g = img->maxColorVal - img->pixel[i].g;
     img->pixel[i].b = img->maxColorVal - img->pixel[i].b;
   }
-
-  cudaFree(cpy);
 }
 
 void green(PPMImage *img)
