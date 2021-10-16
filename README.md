@@ -10,5 +10,5 @@ Apply image effects using parallel computing.
 ## Main Tasks:  
 - [x] Read the image;  
 - [x] Convert the image to .ppm;  
-- [ ] Apply effects;  
-- [ ] Convert the image to the source format.  
+- [x] Apply effects;  
+- [x] Convert the image to the source format.  
