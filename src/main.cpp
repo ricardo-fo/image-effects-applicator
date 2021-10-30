@@ -1,5 +1,6 @@
 #include <iostream>
 #include <climits>
+#include <cuda.h>
 #include "utils.h"
 #include "filetools.h"
 
@@ -11,14 +12,7 @@ int main() {
     char * path = read_str();
 
     // Checa se o arquivo existe
-    if (!has_file(path)) {
-      cout << "\nO arquivo do caminho informado não pôde ser encontrado." << endl;
-      return 1;
-    }
-
-    // Transforma o arquivo para .ppm
-    char * new_path = to_ppm(path);
-    free(path);
+    
 
     // Aplica os efeitos e salva as imagens
     cout << "\nDigite o número dos efeitos que deseja aplicar, seperando-os por vírgula.\nExemplo:\n>>> 1, 2\n>>> 3, 1, 2\n\nEfeitos disponíveis:\n<1> Inverter cores;\n<2> Verde;\n<3> Listrado.\n>>> ";
@@ -26,7 +20,7 @@ int main() {
     int * effectsArr = extract_effects(effects);
     free(effects);
 
-    apply_effects(new_path, effectsArr);
+    apply_effects(path, effectsArr);
 
     cout << "\nEfeitos aplicados com sucesso." << endl;
 

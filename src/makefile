@@ -1,12 +1,13 @@
 ##### Variáveis #####
 # Compilador
-CC=g++
+CC=nvcc
 
 # Flags
-CFLAGS=-W -Wall -O
+#CFLAGS=--compiler-options -W --compiler-options -Wall --compiler-options -O  --compiler-options -lpng --compiler-options -Dcimg_display=0 --compiler-options -Dcimg_use_vt100
+#XFLAGS=-Wno-deprecated-gpu-targets --compiler-options -Wextra --compiler-options -Wall --compiler-options -O3 --compiler-options -Wno-unused-result --compiler-options -Wno-unused-parameter
 
 # OpenMP
-OMPFLAGS=-L/usr/X11R6/lib -lm -lpthread -lX11 -fopenmp
+#OMPFLAGS= --compiler-options -L/usr/X11R6/lib --compiler-options -lm  -lpthread  -lX11 --compiler-options -fopenmp
 
 # Executável
 EXEC=exec
@@ -22,7 +23,7 @@ OBJ=$(SRC:.cpp=.o)
 
 ##### Regras e dependências #####
 $(PROJ_NAME): $(OBJ)
-	$(CC) -o $(PROJ_NAME) $(OBJ) $(OMPFLAGS) $(CFLAGS) -x c++
+	$(CC) -o $(PROJ_NAME) $(OBJ) 
 	@echo "\nCompilação finalizada!"
 	@echo "\nComandos aceitos:"
 	@echo "'make run'      - Executa a aplicação."
@@ -30,20 +31,20 @@ $(PROJ_NAME): $(OBJ)
 	@echo "'make clean'    - Remove todos os arquivos .o que foram gerados."
 	@echo "'make mrproper' - Remove o arquivo executável gerado."
 
-main.o: main.cpp filetools.h utils.h CImg.h
-	$(CC) -c main.cpp $(CFLAGS)
+main.o: main.cpp filetools.h utils.h
+	$(CC) -c main.cpp 
 
-filetools.o: filetools.h utils.h CImg.h PPMImage.h PPMReader.h
-	$(CC) -c filetools.cpp $(CFLAGS) $(OMPFLAGS)
+filetools.o: filetools.h utils.h PPMImage.h PPMReader.h
+	$(CC) -c filetools.cpp 
 
 utils.o: utils.h
-	$(CC) -c utils.cpp $(CFLAGS)
+	$(CC) -c utils.cpp 
 
 PPMImage.o: PPMImage.h
-	$(CC) -c PPMImage.cpp $(CFLAGS)
+	$(CC) -c PPMImage.cpp
 
 PPMReader.o: PPMReader.h PPMImage.h
-	$(CC) -c PPMReader.cpp $(CFLAGS)
+	$(CC) -c PPMReader.cpp 
 
 # Executar
 run:

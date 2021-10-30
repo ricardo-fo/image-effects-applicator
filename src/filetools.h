@@ -5,14 +5,8 @@
 
 #include "PPMImage.h"
 
-/* Verifica se um arquivo existe. */
-bool has_file(const char *);
-
 /* Extrai o nome de um arquivo, se a sua extensão, de um caminho informado. */
 char * get_filename(const char *);
-
-/* Converte um arquivo de imagem para .ppm */
-char * to_ppm(const char *);
 
 /* Extrai os efeitos passados em uma string. */
 int * extract_effects(const char *);

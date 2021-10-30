@@ -3,9 +3,9 @@
 #include <omp.h>
 #include "filetools.h"
 #include "utils.h"
-#include "CImg.h"
 #include "PPMReader.h"
 #include "PPMImage.h"
+#include <cuda_runtime.h>
 
 using namespace std;
 
@@ -18,11 +18,6 @@ using namespace std;
  *
  * returns: inline bool
  */
-bool has_file(const char *path)
-{
-  struct stat buffer;
-  return (stat(path, &buffer) == 0);
-}
 
 /**
  * Function: to_ppm
@@ -33,39 +28,7 @@ bool has_file(const char *path)
  *
  * returns: void
  */
-char *to_ppm(const char *path)
-{
-  // Gera o nome do arquivo
-  char *filename = get_filename(path);
-  filename = strcat(filename, ".ppm");
-  char *fullpath = new char[strlen(filename) + sizeof(char) * 5];
-  strcpy(fullpath, "img/");
-  strcat(fullpath, filename);
-  char *c_random;
-  string random;
 
-  // Verifica se o nome do arquivo já existe
-  while (has_file(fullpath))
-  {
-    // Gera o novo nome
-    filename = get_filename(path);
-    random = to_string(rand() % 1000);
-    c_random = read_str(random);
-    strcat(filename, c_random);
-    strcat(filename, ".ppm");
-
-    // Cria o caminho completo
-    fullpath = new char[strlen(filename) + sizeof(char) * 5];
-    strcpy(fullpath, "img/");
-    strcat(fullpath, filename);
-  }
-
-  // Gera a imagem .ppm
-  cimg_library::CImg<unsigned char> image(path);
-  image.save(fullpath);
-
-  return fullpath;
-}
 
 /**
  * Function: get_filename
@@ -188,44 +151,49 @@ char *trim(char *str)
 void apply_effects(const char *path, int *effects)
 {
   // Setta o máximo de threads disponíveis
-  omp_set_num_threads(omp_get_max_threads());
+  //omp_set_num_threads(omp_get_max_threads());
 
   // Lê a imagem ppm gerada
-  PPMReader reader(path);
+  PPMReader *reader = new PPMReader(path);
+
+  cudaMalloc((void **) &reader, (size_t) 500000);
   char *filename = (char *)malloc(0);
   char *fullpath = (char *)malloc(0);
 
   // Aplica os efeitos
+  PPMImage *aux ;
   while (*effects != INT_MIN)
   {
     switch (*effects)
     {
     case 1:
-      reader.load();
-      reverseColor(reader.getImage());
+      reader->load();
+      aux = reader->getImage();
+      cudaMalloc((void **) &aux, (size_t) 500000);
+      reverseColor(aux);
       fullpath = read_str("img/");
       filename = get_filename(path);
       strcat(filename, "_1.ppm");
       strcat(fullpath, filename);
-      reader.write(fullpath);
+      reader->write(fullpath);
       break;
     case 2:
-      reader.load();
-      green(reader.getImage());
+      reader->load();
+      green(reader->getImage());
       fullpath = read_str("img/");
       filename = get_filename(path);
       strcat(filename, "_2.ppm");
       strcat(fullpath, filename);
-      reader.write(fullpath);
+      reader->write(fullpath);
       break;
     case 3:
-      reader.load();
-      striped(reader.getImage());
+      reader->load();
+      striped(reader->getImage());
       fullpath = read_str("img/");
       filename = get_filename(path);
       strcat(filename, "_3.ppm");
       strcat(fullpath, filename);
-      reader.write(fullpath);
+      reader->write(fullpath);
       break;
     default:
       cout << "O efeito '" << *effects << "' não foi encontrado." << endl;
@@ -237,13 +205,13 @@ void apply_effects(const char *path, int *effects)
     };
   }
 
-  free(fullpath);
-  free(filename);
+  cudaFree(fullpath);
+  cudaFree(filename);
 }
 
-void reverseColor(PPMImage *img)
+__global__ void reverseColor(PPMImage *img)
 {
-#pragma omp parallel for
+//#pragma omp parallel for
   for (int i = 0; i < img->width * img->height; i++)
   {
     img->pixel[i].r = img->maxColorVal - img->pixel[i].r;
@@ -252,9 +220,9 @@ void reverseColor(PPMImage *img)
   }
 }
 
-void green(PPMImage *img)
+__global__ void green(PPMImage *img)
 {
-#pragma omp parallel for
+//#pragma omp parallel for
   for (int i = 0; i < img->width * img->height; i++)
   {
     img->pixel[i].r = (int)img->pixel[i].r * 0.2126;
@@ -263,9 +231,9 @@ void green(PPMImage *img)
   }
 }
 
-void striped(PPMImage *img)
+__global__ void striped(PPMImage *img)
 {
-#pragma omp parallel for
+//#pragma omp parallel for
   for (int i = 0; i < img->width * img->height; i++)
   {
     if (i % 3 == 0)
