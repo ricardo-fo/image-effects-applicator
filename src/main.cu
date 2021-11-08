@@ -1,342 +1,147 @@
-#include <iostream>
-#include <climits>
-#include <cstring>
-#include <cuda.h>
-#include <cuda_runtime.h>
+#include <stdio.h>
 
-using namespace std;
-
-
-char * read_str() {
-  string str;
-  getline(cin, str);
-
-  // Converte a string para char *
-  char * c_str = new char [str.length() + 1];
-  strcpy(c_str, str.c_str());
-
-  // Aloca dinamicamente espaço para a string
-  char * dyn_str;
-  cudaMalloc(&dyn_str, sizeof(char));
-  dyn_str = (char *) realloc(c_str, (str.length() + 1) * sizeof(char));
-
-  return dyn_str;
-}
-
-char * read_str(string str) {
-  if (str.length() == 0) {
-      getline(cin, str);
-  }
-
-  // Converte a string para char *
-  char * c_str = new char [str.length() + 1];
-  strcpy(c_str, str.c_str());
-
-  // Aloca dinamicamente espaço para a string
-  char * dyn_str;
-  cudaMalloc(&dyn_str, sizeof(char));
-  dyn_str = (char *) realloc(c_str, (str.length() + 1) * sizeof(char));
-
-  return dyn_str;
-}
-
-typedef struct {
-  unsigned char r, g, b;
-} PPMPixel;
-
-class PPMImage {
-  public:
-    PPMImage();
-
-    int width; // Width of the image
-    int height; // Height of the image
-    int maxColorVal; // Maximum color value
-    PPMPixel * pixel;
-};
-
-class PPMReader {
-  private:
-    char * path;
-    PPMImage * image;
-
-  public:
-    PPMReader(const char *);
-
-    // Carrega a imagem ppm
-    void load();
-
-    // Salva uma imagem ppm
-    void write(const char *);
-
-    // Retorna um objeto contendo os dados da imagem PPM
-    PPMImage * getImage();
-
-    void setImage(PPMImage *);
-
-    // Muda o caminho até o arquivo ppm
-    void setPath(const char *);
-};
-
-PPMReader::PPMReader(const char * _path) {
-  path = new char[strlen(_path) + 1];
-  strcpy(path, _path);
-}
-
-void PPMReader::load() {
-  char pSix[10];
-
-  // Abre a imagem
-  FILE * stream = fopen(path, "rb");
-  if (stream == NULL) {
-    cout << "Erro ao abrir o arquivo " << path << endl;
-    exit(1);
-  }
-
-  // Verifica se o arquivo é do formato PPM
-  if (fscanf(stream, "%s", pSix) <= 0 || strncmp(pSix, "P6", 10) != 0) {
-    cout << "Erro ao ler o arquivo PPM. Arquivo: " << path << endl;
-    exit(1);
-  }
-
-  PPMImage * img;
-  cudaMalloc(&img, sizeof(PPMImage));
-  if (!img) {
-    cout << "Erro ao alocar memória." << endl;
-    exit(1);
-  }
-
-  if (fscanf(stream, "%d %d", &(img->width), &(img->height)) != 2) {
-    cout << "Tamanho da imagem inválido." << endl;
-    exit(1);
-  }
-
-  if (fscanf(stream, "%d", &(img->maxColorVal)) != 1) {
-    cout << "A imagem contém um range de RGB inválido." << endl;
-    exit(1);
-  }
-
-  while(fgetc(stream) != '\n');
-
-  cudaMalloc(&img->pixel, sizeof(PPMPixel) * img->width * img->height);
-  if (!img) {
-    cout << "Erro ao alocar memória." << endl;
-    exit(1);
-  }
-
-  if ((int)fread(img->pixel, 3 * img->width, img->height, stream) != img->height) {
-    cout << "Erro ao carregar a imagem." << endl;
-    exit(1);
-  }
-
-  fclose(stream);
-
-  image = img;
-}
-
-void PPMReader::write(const char * filename) {
-  FILE * stream = fopen(filename, "wb");
-  if (stream == NULL) {
-    cout << "Erro ao abrir o arquivo: " << path << endl;
-    exit(1);
-  }
-
-  fprintf(stream, "P6\n");
-  fprintf(stream, "%d %d\n", image->width, image->height);
-  fprintf(stream, "%d\n", image->maxColorVal);
-  fwrite(image->pixel, 3 * image->width, image->height, stream);
-  fclose(stream);
-}
-
-PPMImage * PPMReader::getImage() {
-  return image;
-}
-
-void PPMReader::setImage(PPMImage * img) {
-  cudaMalloc(&image, sizeof(img));
-  image = img;
-}
-
-void PPMReader::setPath(const char * _path) {
-  path = new char[strlen(_path) + 1];
-  strcpy(path, _path);
-}
-
-char *get_filename(const char *path)
+// read a ppm image from a file
+unsigned char *read_ppm(const char *filename, int *width, int *height, int *maxval)
 {
-  string cpp_path = string(path);
-  size_t last_bar = cpp_path.find_last_of("/");
-  size_t last_dot = cpp_path.find_last_of(".");
-  string filename = cpp_path.substr(last_bar + sizeof(char), last_dot - last_bar - 1);
+    FILE *fp;
+    unsigned char *data_cpu;
+    int w, h, m;
 
-  return read_str(filename);
-}
-
-char *ltrim(char *str)
-{
-  while (isspace(*str))
-    str++;
-  return str;
-}
-
-
-char *rtrim(char *str)
-{
-  char *back = str + strlen(str);
-  while (isspace(*--back))
-    ;
-  *(back + 1) = '\0';
-  return str;
-}
-
-char *trim(char *str)
-{
-  return rtrim(ltrim(str));
-}
-
-
-int *extract_effects(const char *effects)
-{
-  const char *delim = ",";
-  char *copy = new char[strlen(effects) + 1];    // Cópia da string effects para ser manipulada
-  char *token = new char[strlen(effects) + 1];   // Token, i.e. efeitos
-  char *sanitized = new char[strlen(token) + 1]; // Token sanitizado
-  int *effects_arr;
-  cudaMalloc(&effects_arr, 0);           // Reserva espaço na memória para o vetor de efeitos
-
-  size_t size = 0;
-
-  // Extrai os efeitos da string copy
-  strcpy(copy, effects);
-  token = strtok(copy, delim);
-  while (token != NULL)
-  {
-    strcpy(sanitized, token);
-
-    // Realoca o tamanho do vetor e insere o novo elemento
-    size += sizeof(int);
-    effects_arr = (int *)realloc(effects_arr, size);
-    effects_arr[(int)(size / sizeof(int)) - 1] = atoi(trim(sanitized));
-
-    // Busca pelo próximo token
-    token = strtok(NULL, delim);
-  }
-
-  // Realoca o vetor para indicar seu fim
-  size += sizeof(int);
-  effects_arr = (int *)realloc(effects_arr, size);
-  effects_arr[(int)(size / sizeof(int)) - 1] = INT_MIN;
-
-  return effects_arr;
-}
-
-__global__ void reverseColor(PPMImage *img)
-{
-//#pragma omp parallel for
-  for (int i = 0; i < img->width * img->height; i++)
-  {
-    img->pixel[i].r = img->maxColorVal - img->pixel[i].r;
-    img->pixel[i].g = img->maxColorVal - img->pixel[i].g;
-    img->pixel[i].b = img->maxColorVal - img->pixel[i].b;
-  }
-}
-
-__global__ void green(PPMImage *img)
-{
-//#pragma omp parallel for
-  for (int i = 0; i < img->width * img->height; i++)
-  {
-    img->pixel[i].r = (int)img->pixel[i].r * 0.2126;
-    img->pixel[i].g = (int)img->pixel[i].g * 0.7152;
-    img->pixel[i].b = (int)img->pixel[i].b * 0.0722;
-  }
-}
-
-__global__ void striped(PPMImage *img)
-{
-//#pragma omp parallel for
-  for (int i = 0; i < img->width * img->height; i++)
-  {
-    if (i % 3 == 0)
-    {
-      img->pixel[i].r = img->maxColorVal - img->pixel[i].r;
-      img->pixel[i].g = img->maxColorVal - img->pixel[i].g;
-      img->pixel[i].b = img->maxColorVal - img->pixel[i].b;
+    fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        printf("Error reading file\n");
+        exit(-1);
     }
-  }
-}
 
-void apply_effects()
-{
-  char * path = "/home/fabio/image-effects-applicator/src/img/vistaSuperior.ppm";
-  int effects[1] = {1};
-  printf("chegou aqui");
+    // read the header
+    fscanf(fp, "P6\n");
+    fscanf(fp, "%d %d\n", &w, &h);
+    fscanf(fp, "%d\n", &m);
 
-  PPMReader reader(path);
-  char *filename;
-  char *fullpath;
-  cudaMalloc(&filename, 0);
-  cudaMalloc(&fullpath, 0);
-
-  // // Aplica os efeitos
-  while (*effects != INT_MIN)
-  {
-    switch (*effects)
+    // allocate space for the image data_cpu
+    data_cpu = (unsigned char *)malloc(3*w*h*sizeof(unsigned char));
+    if (data_cpu == NULL)
     {
-    case 1:
-      reader.load();
-      reverseColor<<<1,1>>>(reader.getImage());
-      fullpath = read_str("img/");
-      filename = get_filename(path);
-      strcat(filename, "_1.ppm");
-      strcat(fullpath, filename);
-      reader.write(fullpath);
-      break;
-    case 2:
-      reader.load();
-      green<<<1,1>>>(reader.getImage());
-      fullpath = read_str("img/");
-      filename = get_filename(path);
-      strcat(filename, "_2.ppm");
-      strcat(fullpath, filename);
-      reader.write(fullpath);
-      break;
-    case 3:
-      reader.load();
-      striped<<<1,1>>>(reader.getImage());
-      fullpath = read_str("img/");
-      filename = get_filename(path);
-      strcat(filename, "_3.ppm");
-      strcat(fullpath, filename);
-      reader.write(fullpath);
-      break;
-    default:
-      cout << "O efeito '" << *effects << "' não foi encontrado." << endl;
+        printf("Error reading file\n");
+        exit(-1);
     }
-  }
 
-  // cudaFree(fullpath);
-  // cudaFree(filename);
+    // read the image data_cpu
+    fread(data_cpu, sizeof(unsigned char), 3*w*h, fp);
+
+    // close the file and return the image data_cpu
+    fclose(fp);
+    *width = w;
+    *height = h;
+    *maxval = m;
+    return data_cpu;
 }
 
+// write a ppm image to a file
+void write_ppm(const char *filename, int width, int height, int maxval, unsigned char *data_cpu)
+{
+    FILE *fp;
+
+    fp = fopen(filename, "wb");
+    if (fp == NULL) {
+        printf("Error writing file\n");
+        exit(-1);
+    }
+
+    // write the header
+    fprintf(fp, "P6\n");
+    fprintf(fp, "%d %d\n", width, height);
+    fprintf(fp, "%d\n", maxval);
+
+    // write the image data_cpu
+    fwrite(data_cpu, sizeof(unsigned char), 3*width*height, fp);
+
+    // close the file
+    fclose(fp);
+}
+
+// copy a ppm image to gpu memory using cudaMemcpy
+void copy_ppm_to_gpu(int width, int height, unsigned char *data_cpu, unsigned char **data_gpu)
+{
+    // allocate space for the image data_cpu on the device
+    cudaMalloc(data_gpu, 3*width*height*sizeof(unsigned char));
+
+    // copy the image data_cpu to the device
+    cudaMemcpy(*data_gpu, data_cpu, 3*width*height*sizeof(unsigned char), cudaMemcpyHostToDevice);
+}
+
+// copy a ppm image from gpu memory using cudaMemcpy
+void copy_ppm_from_gpu(int width, int height, unsigned char *data_cpu, unsigned char *data_gpu)
+{
+    // copy the image data_cpu from the device
+    cudaMemcpy(data_cpu, data_gpu, 3*width*height*sizeof(unsigned char), cudaMemcpyDeviceToHost);
+}
+
+// transform a ppm image to grayscale using CUDA
+__global__ void transform_ppm_to_grayscale(int width, int height, unsigned char *data_gpu)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int length = width*height;
+    int section_size = (length-1) / (blockDim.x*gridDim.x) + 1;
+    int start = x*section_size;
+
+    for (int k = 0; k < section_size; k++) {
+        if (start+k < length) {
+            int index = 3*(start+k);
+            int gray = (data_gpu[index] + data_gpu[index+1] + data_gpu[index+2]) / 3;
+            data_gpu[index] = gray;
+            data_gpu[index+1] = gray;
+            data_gpu[index+2] = gray;
+        }
+    }
+}
+
+// transform a ppm image to greenscale using CUDA
+__global__ void transform_ppm_to_greenscale(int width, int height, unsigned char *data_gpu)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int length = width*height;
+    int section_size = (length-1) / (blockDim.x*gridDim.x) + 1;
+    int start = x*section_size;
+
+    for (int k = 0; k < section_size; k++) {
+        if (start+k < length) {
+            int index = 3*(start+k);
+            data_gpu[index] = 0;
+            data_gpu[index+2] = 0;
+        }
+    }
+}
 
 int main() {
-    // Lê o caminho até o arquivo
-    cout << "Caminho absoluto até a sua imagem: ";
-    char * path = read_str();
+    int width, height, maxval;
+    unsigned char *data_cpu;
+    unsigned char *data_gpu;
+    cudaDeviceProp pdev;
 
-    // Checa se o arquivo existe
-    
+    // get gpu properties
+    cudaGetDeviceProperties(&pdev, 0);
 
-    // Aplica os efeitos e salva as imagens
-    cout << "\nDigite o número dos efeitos que deseja aplicar, seperando-os por vírgula.\nExemplo:\n>>> 1, 2\n>>> 3, 1, 2\n\nEfeitos disponíveis:\n<1> Inverter cores;\n<2> Verde;\n<3> Listrado.\n>>> ";
-    char * effects = read_str();
-    int * effectsArr = extract_effects(effects);
+    // read the image data
+    data_cpu = read_ppm("img/sample.ppm", &width, &height, &maxval);
 
-    printf("%s\n", path);
-    printf("%d\n", effectsArr[0]);
-    apply_effects();
+    // copy the image data to gpu memory
+    copy_ppm_to_gpu(width, height, data_cpu, &data_gpu);
 
-    cout << "\nEfeitos aplicados com sucesso." << endl;
+    // transform the image data on the device
+    transform_ppm_to_grayscale<<<(width * height + pdev.maxThreadsDim[0]) / pdev.maxThreadsDim[0], pdev.maxThreadsDim[0]>>>(width, height, data_gpu);
+
+    // copy the image data from gpu memory
+    copy_ppm_from_gpu(width, height, data_cpu, data_gpu);
+
+    // write the image data to a new file
+    write_ppm("img/sample_copy.ppm", width, height, maxval, data_cpu);
+
+    // free the image data
+    free(data_cpu);
+
+    // free the image data on the device
+    cudaFree(data_gpu);
 
     return 0;
 }
